@@ -1,0 +1,11 @@
+<library path="lib/libinfobot_rviz_pose_tool">
+
+  <class name="infobot_rviz_pose_tool/PoseTool"
+         type="infobot_rviz_pose_tool::PoseTool"
+         base_class_type="rviz::Tool">
+    <description>
+      Get and publish the selected pose.
+    </description>
+  </class>
+
+</library>

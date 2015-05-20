@@ -1,0 +1,23 @@
+<package>
+
+  <!-- Package Info -->
+  <name>infobot_rviz_pose_tool</name>
+  <version>0.0.0</version>
+  <description>
+    InfoBot Framework: RVIZ tool for publishing the selected pose.
+  </description>
+  <author email="a.pronobis@gmail.com">Andrzej Pronobis</author>
+  <maintainer email="mjyc@cs.washington.edu">Michael Jae-Yoon Chung</maintainer>
+  <license>TODO</license>
+
+  <!-- Dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rviz</build_depend>
+  <run_depend>rviz</run_depend>
+
+  <export>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+
+</package>
