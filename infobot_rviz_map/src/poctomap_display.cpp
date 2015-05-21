@@ -64,7 +64,7 @@ using rviz::StatusProperty;
 namespace infobot_rviz_map
 {
 
-static const std::size_t max_octree_depth_ = sizeof(unsigned short) * 8;
+static const std::size_t max_octree_depth_ = sizeof(unsigned int16) * 8;
 
 enum OctreeVoxelRenderMode
 {
