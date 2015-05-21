@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+    <node name="map_server" pkg="map_server" type="map_server" args="'$(find infobot_rviz_topo_map)/test/real-floor4.yaml'">
+        <remap from="/map" to="/metric_map" />
+    </node>
+
+    <node pkg="infobot_topo_server" type="topo_server" name="topo_saver"
+          output="screen" args="$(find infobot_rviz_topo_map)/test/real-floor4-topo.yaml">
+        <remap from="~topo_map" to="/topo_map"/>
+    </node>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find infobot_rviz_topo_map)/test/rviz.rviz" />
+
+</launch>

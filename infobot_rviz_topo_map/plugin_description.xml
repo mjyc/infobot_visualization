@@ -1,0 +1,13 @@
+<library path="lib/libinfobot_rviz_topo_map">
+
+  <class name="infobot_rviz_topo_map/TopoMapDisplay"
+         type="infobot_rviz_topo_map::TopoMapDisplay"
+         base_class_type="rviz::Display">
+
+    <description>
+      Displays the topological map.
+    </description>
+
+  </class>
+
+</library>
