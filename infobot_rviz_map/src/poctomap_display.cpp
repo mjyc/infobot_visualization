@@ -386,6 +386,8 @@ void ProbabilityOctomapDisplay::incomingMessageCallback(const octomap_msgs::Octo
           newPoint.position.y = it.getY();
           newPoint.position.z = it.getZ();
 
+          // NOTE: make sure to use same code in
+          //       infobot_find_viewpoint/src/pmap_to_octomap_node.cpp
           int probValOffset = static_cast<int>(octomap->getClampingThresMaxLog() + 0.5);
           float cellProb;
 
