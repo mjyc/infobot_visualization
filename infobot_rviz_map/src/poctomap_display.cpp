@@ -407,7 +407,9 @@ void ProbabilityOctomapDisplay::incomingMessageCallback(const octomap_msgs::Octo
             }
             else
             {
-              ROS_ERROR_STREAM("Input data (" << cellProb << ")is not in a proper \"ProbabilityOctomap\" range.");
+              ROS_ERROR_STREAM("The input data (" << cellProb << ") at (" << it.getX() << "," << it.getY() << "," <<
+                it.getZ() << ")" << " is not in a proper \"ProbabilityOctomap\" range. Setting it to 0.");
+              cellProb = 0.0;
             }
             double r, g, b;
             colorMATLABJetPalette(cellProb, 0.0, 1.0, r, g, b);
