@@ -1,4 +1,12 @@
 <library path="lib/libinfobot_rviz_map">
+  <class name="infobot_rviz_map/Map"
+         type="infobot_rviz_map::MapDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays Map messages.
+    </description>
+    <message_type>nav_msgs/OccupancyGrid</message_type>
+  </class>
   <class name="infobot_rviz_map/ProbabilityMap"
          type="infobot_rviz_map::ProbabilityMapDisplay"
          base_class_type="rviz::Display">

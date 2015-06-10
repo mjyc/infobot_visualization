@@ -22,6 +22,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 ## Here we specify which header files need to be run through "moc",
 ## Qt's meta-object compiler.
 qt4_wrap_cpp(MOC_FILES
+  src/map_display.h
   src/pmap_display.h
   src/poctomap_display.h
   OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
@@ -30,6 +31,7 @@ qt4_wrap_cpp(MOC_FILES
 ## Here we specify the list of source files, including the output of
 ## the previous command which is stored in ``${MOC_FILES}``.
 set(SOURCE_FILES
+  src/map_display.cpp
   src/pmap_display.cpp
   src/poctomap_display.cpp
   ${MOC_FILES}

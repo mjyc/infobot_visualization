@@ -54,13 +54,12 @@
 #include <rviz/validate_floats.h>
 #include <rviz/display_context.h>
 
-#include "./pmap_display.h"
-#include "./color_utils.h"
+#include "./map_display.h"
 
 namespace infobot_rviz_map
 {
 
-ProbabilityMapDisplay::ProbabilityMapDisplay()
+MapDisplay::MapDisplay()
   : Display()
   , manual_object_(NULL)
   , loaded_(false)
@@ -69,42 +68,42 @@ ProbabilityMapDisplay::ProbabilityMapDisplay()
   , height_(0)
 {
   connect(this, SIGNAL(mapUpdated()), this, SLOT(showMap()));
-  topic_property_ = new rviz::RosTopicProperty("Topic", "",
-      QString::fromStdString(ros::message_traits::datatype<infobot_map_msgs::ProbabilityGrid>()),
-      "infobot_map_msgs::ProbabilityGrid topic to subscribe to.",
-      this, SLOT(updateTopic()));
+  topic_property_ = new rviz::RosTopicProperty(
+    "Topic", "", QString::fromStdString(ros::message_traits::datatype<nav_msgs::OccupancyGrid>()),
+    "nav_msgs::OccupancyGrid topic to subscribe to.", this, SLOT(updateTopic()));
 
   alpha_property_ = new rviz::FloatProperty("Alpha", 0.7,
-      "Amount of transparency to apply to the map.",
-      this, SLOT(updateAlpha()));
+                                      "Amount of transparency to apply to the map.",
+                                      this, SLOT(updateAlpha()));
   alpha_property_->setMin(0);
   alpha_property_->setMax(1);
 
-  color_scheme_property_ = new rviz::EnumProperty("Color Scheme", "costmap", "How to color the probability values.",
+  color_scheme_property_ = new rviz::EnumProperty("Color Scheme", "map", "How to color the occupancy values.",
       this, SLOT(updatePalette()));
   // Option values here must correspond to indices in palette_textures_ array in onInitialize() below.
-  color_scheme_property_->addOption("costmap", 0);
+  color_scheme_property_->addOption("map", 0);
+  color_scheme_property_->addOption("colormap", 1);
 
   draw_under_property_ = new rviz::Property("Draw Behind", false,
-      "Rendering option, controls whether or not the map is always"
-      " drawn behind everything else.",
-      this, SLOT(updateDrawUnder()));
+                                      "Rendering option, controls whether or not the map is always"
+                                      " drawn behind everything else.",
+                                      this, SLOT(updateDrawUnder()));
 
   resolution_property_ = new rviz::FloatProperty("Resolution", 0,
       "Resolution of the map. (not editable)", this);
   resolution_property_->setReadOnly(true);
 
   width_property_ = new rviz::IntProperty("Width", 0,
-                                          "Width of the map, in meters. (not editable)", this);
+                                    "Width of the map, in meters. (not editable)", this);
   width_property_->setReadOnly(true);
 
   height_property_ = new rviz::IntProperty("Height", 0,
-      "Height of the map, in meters. (not editable)", this);
+                                     "Height of the map, in meters. (not editable)", this);
   height_property_->setReadOnly(true);
 
   position_property_ = new rviz::VectorProperty("Position", Ogre::Vector3::ZERO,
-      "Position of the bottom left corner of the map, in meters. (not editable)",
-      this);
+                                          "Position of the bottom left corner of the map, in meters. (not editable)",
+                                          this);
   position_property_->setReadOnly(true);
 
   orientation_property_ = new rviz::QuaternionProperty("Orientation", Ogre::Quaternion::IDENTITY,
@@ -113,30 +112,23 @@ ProbabilityMapDisplay::ProbabilityMapDisplay()
   orientation_property_->setReadOnly(true);
 }
 
-ProbabilityMapDisplay::~ProbabilityMapDisplay()
+MapDisplay::~MapDisplay()
 {
   unsubscribe();
   clear();
 }
 
-unsigned char* makeProbabilityMapPalette()
+unsigned char* makeMapPalette()
 {
   unsigned char* palette = new unsigned char[256 * 4];
   unsigned char* palette_ptr = palette;
-
-  // zero values have alpha=0
-  *palette_ptr++ = 0;  // red
-  *palette_ptr++ = 0;  // green
-  *palette_ptr++ = 0;  // blue
-  *palette_ptr++ = 0;  // alpha
-
-  for (int i = 1; i <= 100; i++)
+  // Standard gray map palette values
+  for (int i = 0; i <= 100; i++)
   {
-    double r, g, b;
-    colorMATLABJetPalette(i * 1.0, 0.0, 100.0, r, g, b);
-    *palette_ptr++ = static_cast<int>(r * 255);  // red
-    *palette_ptr++ = static_cast<int>(g * 255);  // green
-    *palette_ptr++ = static_cast<int>(b * 255);  // blue
+    unsigned char v = 255 - (255 * i) / 100;
+    *palette_ptr++ = v;  // red
+    *palette_ptr++ = v;  // green
+    *palette_ptr++ = v;  // blue
     *palette_ptr++ = 255;  // alpha
   }
   // illegal positive values in green
@@ -164,29 +156,69 @@ unsigned char* makeProbabilityMapPalette()
   return palette;
 }
 
-Ogre::TexturePtr makeProbabilityMapPaletteTexture(unsigned char *palette_bytes)
+unsigned char* makeColorMapPalette()
+{
+  unsigned char* palette = new unsigned char[256 * 4];
+  unsigned char* palette_ptr = palette;
+  // Standard gray map palette values
+  for (int i = 0; i <= 100; i++)
+  {
+    unsigned char v = 255 - (255 * i) / 100;
+    *palette_ptr++ = v;  // red
+    *palette_ptr++ = v;  // green
+    *palette_ptr++ = v;  // blue
+    *palette_ptr++ = 255;  // alpha
+  }
+  // illegal positive values in green
+  for (int i = 101; i <= 127; i++)
+  {
+    *palette_ptr++ = 0;  // red
+    *palette_ptr++ = 255;  // green
+    *palette_ptr++ = 0;  // blue
+    *palette_ptr++ = 255;  // alpha
+  }
+  // illegal negative (char) values in shades of red/yellow
+  for (int i = 128; i <= 254; i++)
+  {
+    *palette_ptr++ = 255;  // red
+    *palette_ptr++ = (255 * (i - 128)) / (254 - 128);  // green
+    *palette_ptr++ = 0;  // blue
+    *palette_ptr++ = 255;  // alpha
+  }
+  // legal -1 value is tasteful blueish greenish grayish color
+  *palette_ptr++ = 205;  // red
+  *palette_ptr++ = 205;  // green
+  *palette_ptr++ = 205;  // blue
+  *palette_ptr++ = 255;  // alpha
+
+  return palette;
+}
+
+Ogre::TexturePtr makePaletteTexture(unsigned char *palette_bytes)
 {
   Ogre::DataStreamPtr palette_stream;
   palette_stream.bind(new Ogre::MemoryDataStream(palette_bytes, 256 * 4));
 
   static int palette_tex_count = 0;
   std::stringstream ss;
-  ss << "ProbabilityMapPaletteTexture" << palette_tex_count++;
+  ss << "MapPaletteTexture" << palette_tex_count++;
   return Ogre::TextureManager::getSingleton().loadRawData(
-    ss.str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-    palette_stream, 256, 1, Ogre::PF_BYTE_RGBA, Ogre::TEX_TYPE_1D, 0);
+    ss.str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, palette_stream, 256, 1, Ogre::PF_BYTE_RGBA,
+    Ogre::TEX_TYPE_1D, 0);
 }
 
-void ProbabilityMapDisplay::onInitialize()
+void MapDisplay::onInitialize()
 {
   // Order of palette textures here must match option indices for color_scheme_property_ above.
-  palette_textures_.push_back(makeProbabilityMapPaletteTexture(makeProbabilityMapPalette()));
-  color_scheme_transparency_.push_back(true);
+  palette_textures_.push_back(makePaletteTexture(makeMapPalette()));
+  color_scheme_transparency_.push_back(false);
+  palette_textures_.push_back(makePaletteTexture(makeColorMapPalette()));
+  color_scheme_transparency_.push_back(false);
 
   // Set up map material
   static int material_count = 0;
   std::stringstream ss;
-  ss << "ProbabilityMapMaterial" << material_count++;
+  ss << "MapMaterial" << material_count++;
   material_ = Ogre::MaterialManager::getSingleton().getByName("rviz/Indexed8BitImage");
   material_ = material_->clone(ss.str());
 
@@ -198,7 +230,7 @@ void ProbabilityMapDisplay::onInitialize()
 
   static int map_count = 0;
   std::stringstream ss2;
-  ss2 << "ProbabilityMapObject" << map_count++;
+  ss2 << "MapObject" << map_count++;
   manual_object_ = scene_manager_->createManualObject(ss2.str());
   scene_node_->attachObject(manual_object_);
 
@@ -253,18 +285,18 @@ void ProbabilityMapDisplay::onInitialize()
   updateAlpha();
 }
 
-void ProbabilityMapDisplay::onEnable()
+void MapDisplay::onEnable()
 {
   subscribe();
 }
 
-void ProbabilityMapDisplay::onDisable()
+void MapDisplay::onDisable()
 {
   unsubscribe();
   clear();
 }
 
-void ProbabilityMapDisplay::subscribe()
+void MapDisplay::subscribe()
 {
   if (!isEnabled())
   {
@@ -275,7 +307,7 @@ void ProbabilityMapDisplay::subscribe()
   {
     try
     {
-      map_sub_ = update_nh_.subscribe(topic_property_->getTopicStd(), 1, &ProbabilityMapDisplay::incomingMap, this);
+      map_sub_ = update_nh_.subscribe(topic_property_->getTopicStd(), 1, &MapDisplay::incomingMap, this);
       setStatus(rviz::StatusProperty::Ok, "Topic", "OK");
     }
     catch (ros::Exception& e)
@@ -283,20 +315,20 @@ void ProbabilityMapDisplay::subscribe()
       setStatus(rviz::StatusProperty::Error, "Topic", QString("Error subscribing: ") + e.what());
     }
 
-    // try
-    // {
-    //   update_sub_ = update_nh_.subscribe(
-    //     topic_property_->getTopicStd() + "_updates", 1, &ProbabilityMapDisplay::incomingUpdate, this );
-    //   setStatus( rviz::StatusProperty::Ok, "Update Topic", "OK" );
-    // }
-    // catch( ros::Exception& e )
-    // {
-    //   setStatus( rviz::StatusProperty::Error, "Update Topic", QString( "Error subscribing: " ) + e.what() );
-    // }
+    try
+    {
+      update_sub_ = update_nh_.subscribe(
+        topic_property_->getTopicStd() + "_updates", 1, &MapDisplay::incomingUpdate, this);
+      setStatus(rviz::StatusProperty::Ok, "Update Topic", "OK");
+    }
+    catch (ros::Exception& e)
+    {
+      setStatus(rviz::StatusProperty::Error, "Update Topic", QString("Error subscribing: ") + e.what());
+    }
   }
 }
 
-void ProbabilityMapDisplay::unsubscribe()
+void MapDisplay::unsubscribe()
 {
   map_sub_.shutdown();
   update_sub_.shutdown();
@@ -318,7 +350,7 @@ private:
   Ogre::Vector4 alpha_vec_;
 };
 
-void ProbabilityMapDisplay::updateAlpha()
+void MapDisplay::updateAlpha()
 {
   float alpha = alpha_property_->getFloat();
 
@@ -343,7 +375,7 @@ void ProbabilityMapDisplay::updateAlpha()
   }
 }
 
-void ProbabilityMapDisplay::updateDrawUnder()
+void MapDisplay::updateDrawUnder()
 {
   bool draw_under = draw_under_property_->getValue().toBool();
 
@@ -365,14 +397,14 @@ void ProbabilityMapDisplay::updateDrawUnder()
   }
 }
 
-void ProbabilityMapDisplay::updateTopic()
+void MapDisplay::updateTopic()
 {
   unsubscribe();
   subscribe();
   clear();
 }
 
-void ProbabilityMapDisplay::clear()
+void MapDisplay::clear()
 {
   setStatus(rviz::StatusProperty::Warn, "Message", "No map received");
 
@@ -395,7 +427,7 @@ void ProbabilityMapDisplay::clear()
   loaded_ = false;
 }
 
-bool validateFloats(const infobot_map_msgs::ProbabilityGrid& msg)
+bool validateFloats(const nav_msgs::OccupancyGrid& msg)
 {
   bool valid = true;
   valid = valid && rviz::validateFloats(msg.info.resolution);
@@ -403,7 +435,7 @@ bool validateFloats(const infobot_map_msgs::ProbabilityGrid& msg)
   return valid;
 }
 
-void ProbabilityMapDisplay::incomingMap(const infobot_map_msgs::ProbabilityGrid::ConstPtr& msg)
+void MapDisplay::incomingMap(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
   current_map_ = *msg;
   // updated via signal in case ros spinner is in a different thread
@@ -412,40 +444,36 @@ void ProbabilityMapDisplay::incomingMap(const infobot_map_msgs::ProbabilityGrid:
 }
 
 
-// void ProbabilityMapDisplay::incomingUpdate(const infobot_map_msgs::ProbabilityGridUpdate::ConstPtr& update)
-// {
-//   // Only update the map if we have gotten a full one first.
-//   if( !loaded_ )
-//   {
-//     return;
-//   }
+void MapDisplay::incomingUpdate(const map_msgs::OccupancyGridUpdate::ConstPtr& update)
+{
+  // Only update the map if we have gotten a full one first.
+  if (!loaded_)
+  {
+    return;
+  }
 
-//   // Reject updates which have any out-of-bounds data.
-//   if( update->x < 0 ||
-//       update->y < 0 ||
-//       current_map_.info.width < update->x + update->width ||
-//       current_map_.info.height < update->y + update->height )
-//   {
-//     setStatus( rviz::StatusProperty::Error, "Update", "Update area outside of original map area." );
-//     return;
-//   }
+  // Reject updates which have any out-of-bounds data.
+  if (update->x < 0 ||
+      update->y < 0 ||
+      current_map_.info.width < update->x + update->width ||
+      current_map_.info.height < update->y + update->height)
+  {
+    setStatus(rviz::StatusProperty::Error, "Update", "Update area outside of original map area.");
+    return;
+  }
 
-//   // Copy the incoming data into current_map_'s data.
-//   for( size_t y = 0; y < update->height; y++ )
-//   {
-//     // memcpy( &current_map_.data[ (update->y + y) * current_map_.info.width + update->x ],
-//     //         &update->data[ y * update->width ],
-//     //         update->width );
-//     for (size_t x = 0; x < update->width; ++x)
-//     {
-//      current_map_.data[(update->y+y)*current_map_.info.width+update->x+x] = update->data[y*update->width+x]*100;
-//     };
-//   }
-//   // updated via signal in case ros spinner is in a different thread
-//   Q_EMIT mapUpdated();
-// }
+  // Copy the incoming data into current_map_'s data.
+  for (size_t y = 0; y < update->height; y++)
+  {
+    memcpy(&current_map_.data[(update->y + y) * current_map_.info.width + update->x ],
+           &update->data[ y * update->width ],
+           update->width);
+  }
+  // updated via signal in case ros spinner is in a different thread
+  Q_EMIT mapUpdated();
+}
 
-void ProbabilityMapDisplay::showMap()
+void MapDisplay::showMap()
 {
   if (current_map_.data.empty())
   {
@@ -454,20 +482,19 @@ void ProbabilityMapDisplay::showMap()
 
   if (!validateFloats(current_map_))
   {
-    setStatus(rviz::StatusProperty::Error, "ProbabilityMap",
-      "Message contained invalid floating point values (nans or infs)");
+    setStatus(rviz::StatusProperty::Error, "Map", "Message contained invalid floating point values (nans or infs)");
     return;
   }
 
   if (current_map_.info.width * current_map_.info.height == 0)
   {
     std::stringstream ss;
-    ss << "ProbabilityMap is zero-sized (" << current_map_.info.width << "x" << current_map_.info.height << ")";
-    setStatus(rviz::StatusProperty::Error, "ProbabilityMap", QString::fromStdString(ss.str()));
+    ss << "Map is zero-sized (" << current_map_.info.width << "x" << current_map_.info.height << ")";
+    setStatus(rviz::StatusProperty::Error, "Map", QString::fromStdString(ss.str()));
     return;
   }
 
-  setStatus(rviz::StatusProperty::Ok, "Message", "ProbabilityMap received");
+  setStatus(rviz::StatusProperty::Ok, "Message", "Map received");
 
   ROS_DEBUG("Received a %d X %d map @ %.3f m/pix\n",
             current_map_.info.width,
@@ -504,7 +531,7 @@ void ProbabilityMapDisplay::showMap()
     std::stringstream ss;
     ss << "Data size doesn't match width*height: width = " << width
        << ", height = " << height << ", data size = " << current_map_.data.size();
-    setStatus(rviz::StatusProperty::Error, "ProbabilityMap", QString::fromStdString(ss.str()));
+    setStatus(rviz::StatusProperty::Error, "Map", QString::fromStdString(ss.str()));
     map_status_set = true;
 
     // Keep going, but don't read past the end of the data.
@@ -514,11 +541,7 @@ void ProbabilityMapDisplay::showMap()
     }
   }
 
-  // memcpy( pixels, &current_map_.data[0], num_pixels_to_copy );
-  for (size_t i = 0; i < num_pixels_to_copy; ++i)
-  {
-    pixels[i] = current_map_.data[i] * 100;
-  }
+  memcpy(pixels, &current_map_.data[0], num_pixels_to_copy);
 
   Ogre::DataStreamPtr pixel_stream;
   pixel_stream.bind(new Ogre::MemoryDataStream(pixels, pixels_size));
@@ -531,16 +554,17 @@ void ProbabilityMapDisplay::showMap()
 
   static int tex_count = 0;
   std::stringstream ss;
-  ss << "ProbabilityMapTexture" << tex_count++;
+  ss << "MapTexture" << tex_count++;
   try
   {
-    texture_ = Ogre::TextureManager::getSingleton().loadRawData(
-      ss.str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, pixel_stream, width, height, Ogre::PF_L8,
-      Ogre::TEX_TYPE_2D, 0);
+    texture_ = Ogre::TextureManager::getSingleton().loadRawData(ss.str(),
+      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+      pixel_stream, width, height, Ogre::PF_L8, Ogre::TEX_TYPE_2D,
+      0);
 
     if (!map_status_set)
     {
-      setStatus(rviz::StatusProperty::Ok, "ProbabilityMap", "ProbabilityMap OK");
+      setStatus(rviz::StatusProperty::Ok, "Map", "Map OK");
     }
   }
   catch (Ogre::RenderingAPIException&)
@@ -564,15 +588,15 @@ void ProbabilityMapDisplay::showMap()
 
     {
       std::stringstream ss;
-      ss << "ProbabilityMap is larger than your graphics card supports.  Downsampled from [" << width << "x" <<
-        height << "] to [" << fwidth << "x" << fheight << "]";
-      setStatus(rviz::StatusProperty::Ok, "ProbabilityMap", QString::fromStdString(ss.str()));
+      ss << "Map is larger than your graphics card supports.  Downsampled from [" << width << "x" << height <<
+        "] to [" << fwidth << "x" << fheight << "]";
+      setStatus(rviz::StatusProperty::Ok, "Map", QString::fromStdString(ss.str()));
     }
 
-    ROS_WARN("Failed to create full-size map texture, likely because your graphics card does not support textures of"
-      " size > 2048.  Downsampling to [%d x %d]...", static_cast<int>(fwidth), static_cast<int>(fheight));
-    // ROS_INFO("Stream size [%d], width [%f], height [%f], w * h [%f]", pixel_stream->size(), width, height,
-    //   width * height);
+    ROS_WARN("Failed to create full-size map texture, likely because your graphics card does not support textures of "
+             "size > 2048.  Downsampling to [%d x %d]...", static_cast<int>(fwidth), static_cast<int>(fheight));
+    // ROS_INFO(
+    //   "Stream size [%d], width [%f], height [%f], w * h [%f]", pixel_stream->size(), width, height, width *
     image.loadRawData(pixel_stream, width, height, Ogre::PF_L8);
     image.resize(fwidth, fheight, Ogre::Image::FILTER_NEAREST);
     ss << "Downsampled";
@@ -611,7 +635,7 @@ void ProbabilityMapDisplay::showMap()
   context_->queueRender();
 }
 
-void ProbabilityMapDisplay::updatePalette()
+void MapDisplay::updatePalette()
 {
   int palette_index = color_scheme_property_->getOptionInt();
 
@@ -631,7 +655,7 @@ void ProbabilityMapDisplay::updatePalette()
   updateAlpha();
 }
 
-void ProbabilityMapDisplay::transformMap()
+void MapDisplay::transformMap()
 {
   Ogre::Vector3 position;
   Ogre::Quaternion orientation;
@@ -652,12 +676,12 @@ void ProbabilityMapDisplay::transformMap()
   scene_node_->setOrientation(orientation);
 }
 
-void ProbabilityMapDisplay::fixedFrameChanged()
+void MapDisplay::fixedFrameChanged()
 {
   transformMap();
 }
 
-void ProbabilityMapDisplay::reset()
+void MapDisplay::reset()
 {
   Display::reset();
 
@@ -666,7 +690,7 @@ void ProbabilityMapDisplay::reset()
   updateTopic();
 }
 
-void ProbabilityMapDisplay::setTopic(const QString &topic, const QString &datatype)
+void MapDisplay::setTopic(const QString &topic, const QString &datatype)
 {
   topic_property_->setString(topic);
 }
@@ -674,4 +698,4 @@ void ProbabilityMapDisplay::setTopic(const QString &topic, const QString &dataty
 }  // namespace infobot_rviz_map
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_map::ProbabilityMapDisplay, rviz::Display)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_map::MapDisplay, rviz::Display)
