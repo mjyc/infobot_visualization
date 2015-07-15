@@ -30,6 +30,10 @@
 #ifndef INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMERS_H
 #define INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMERS_H
 
+#include <algorithm>
+#include <vector>
+#include <string>
+
 #include <sensor_msgs/PointCloud2.h>
 
 #include "./point_cloud_transformer.h"
@@ -62,7 +66,8 @@ inline int32_t findChannelIndex(const sensor_msgs::PointCloud2ConstPtr& cloud, c
 }
 
 template<typename T>
-inline T valueFromCloud(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t offset, uint8_t type, uint32_t point_step, uint32_t index)
+inline T valueFromCloud(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t offset, uint8_t type,
+  uint32_t point_step, uint32_t index)
 {
   const uint8_t* data = &cloud->data[(point_step * index) + offset];
   T ret = 0;
@@ -71,41 +76,41 @@ inline T valueFromCloud(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t 
   {
   case sensor_msgs::PointField::INT8:
   case sensor_msgs::PointField::UINT8:
-    {
-      uint8_t val = *reinterpret_cast<const uint8_t*>(data);
-      ret = static_cast<T>(val);
-      break;
-    }
+  {
+    uint8_t val = *reinterpret_cast<const uint8_t*>(data);
+    ret = static_cast<T>(val);
+    break;
+  }
 
   case sensor_msgs::PointField::INT16:
   case sensor_msgs::PointField::UINT16:
-    {
-      uint16_t val = *reinterpret_cast<const uint16_t*>(data);
-      ret = static_cast<T>(val);
-      break;
-    }
+  {
+    uint16_t val = *reinterpret_cast<const uint16_t*>(data);
+    ret = static_cast<T>(val);
+    break;
+  }
 
   case sensor_msgs::PointField::INT32:
   case sensor_msgs::PointField::UINT32:
-    {
-      uint32_t val = *reinterpret_cast<const uint32_t*>(data);
-      ret = static_cast<T>(val);
-      break;
-    }
+  {
+    uint32_t val = *reinterpret_cast<const uint32_t*>(data);
+    ret = static_cast<T>(val);
+    break;
+  }
 
   case sensor_msgs::PointField::FLOAT32:
-    {
-      float val = *reinterpret_cast<const float*>(data);
-      ret = static_cast<T>(val);
-      break;
-    }
+  {
+    float val = *reinterpret_cast<const float*>(data);
+    ret = static_cast<T>(val);
+    break;
+  }
 
   case sensor_msgs::PointField::FLOAT64:
-    {
-      double val = *reinterpret_cast<const double*>(data);
-      ret = static_cast<T>(val);
-      break;
-    }
+  {
+    double val = *reinterpret_cast<const double*>(data);
+    ret = static_cast<T>(val);
+    break;
+  }
   default:
     break;
   }
@@ -115,7 +120,7 @@ inline T valueFromCloud(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t 
 
 class IntensityPCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
   virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud,
@@ -123,7 +128,7 @@ public:
                          const Ogre::Matrix4& transform,
                          V_PointCloudPoint& points_out);
   virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual void createProperties( rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props );
+  virtual void createProperties(rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props);
   void updateChannels(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
 private Q_SLOTS:
@@ -145,41 +150,45 @@ private:
 
 class XYZPCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& points_out);
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& points_out);
 };
 
 
 
 class RGB8PCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& points_out);
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& points_out);
 };
 
 
 
 class RGBF32PCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& points_out);
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& points_out);
 };
 
 
 
 class FlatColorPCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& points_out);
-  virtual void createProperties( rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props );
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& points_out);
+  virtual void createProperties(rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props);
   virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
 private:
@@ -188,11 +197,12 @@ private:
 
 class AxisColorPCTransformer : public PointCloudTransformer
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& points_out);
-  virtual void createProperties( rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props );
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& points_out);
+  virtual void createProperties(rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props);
   virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
   enum Axis
@@ -213,6 +223,6 @@ private:
   rviz::BoolProperty* use_fixed_frame_property_;
 };
 
-}
+}  // namespace infobot_rviz_longterm
 
-#endif // INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMERS_H
+#endif  // INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMERS_H

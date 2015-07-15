@@ -30,6 +30,9 @@
 #ifndef INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMER_H
 #define INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMER_H
 
+#include <algorithm>
+#include <vector>
+
 #include <QObject>
 
 #include <ros/message_forward.h>
@@ -62,7 +65,7 @@ typedef std::vector<rviz::PointCloud::Point> V_PointCloudPoint;
 
 class PointCloudTransformer: public QObject
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   virtual void init() {}
 
@@ -75,7 +78,7 @@ public:
     Support_None = 0,
     Support_XYZ = 1 << 1,
     Support_Color = 1 << 2,
-    Support_Both = Support_XYZ|Support_Color,
+    Support_Both = Support_XYZ | Support_Color,
   };
 
   /**
@@ -87,29 +90,33 @@ public:
    * size.  The mask determines which part of the cloud should be output (xyz or color).  This method will only be called if supports() of the same
    * cloud has returned a non-zero mask, and will only be called with masks compatible with the one returned from supports()
    */
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform, V_PointCloudPoint& out) = 0;
+  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
+    V_PointCloudPoint& out) = 0;
 
   /**
    * \brief "Score" a message for how well supported the message is.  For example, a "flat color" transformer can support any cloud, but will
    * return a score of 0 here since it should not be preferred over others that explicitly support fields in the message.  This allows that
    * "flat color" transformer to still be selectable, but generally not chosen automatically.
    */
-  virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud) { return 0; }
+  virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud)
+  {
+    return 0;
+  }
 
   /**
    * \brief Create any properties necessary for this transformer.
    * Will be called once when the transformer is loaded.  All
    * properties must be added to the out_props vector.
    */
-  virtual void createProperties( rviz::Property* parent_property,
-                                 uint32_t mask,
-                                 QList<rviz::Property*>& out_props ) {}
+  virtual void createProperties(rviz::Property* parent_property,
+                                uint32_t mask,
+                                QList<rviz::Property*>& out_props) {}
 
 Q_SIGNALS:
   /** @brief Subclasses should emit this signal whenever they think the points should be re-transformed. */
   void needRetransform();
 };
 
-} // namespace infobot_rviz_longterm
+}  // namespace infobot_rviz_longterm
 
 #endif

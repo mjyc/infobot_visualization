@@ -34,6 +34,9 @@
 # include <deque>
 # include <queue>
 # include <vector>
+# include <list>
+# include <string>
+# include <map>
 
 # include <QObject>
 # include <QList>
@@ -92,7 +95,7 @@ typedef std::vector<std::string> V_string;
  */
 class PointCloudCommon: public QObject
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   struct CloudInfo
   {
@@ -116,7 +119,7 @@ public:
 
     Ogre::Quaternion orientation_;
     Ogre::Vector3 position_;
-};
+  };
 
   typedef boost::shared_ptr<CloudInfo> CloudInfoPtr;
   typedef std::deque<CloudInfoPtr> D_CloudInfo;
@@ -124,10 +127,10 @@ public:
   typedef std::queue<CloudInfoPtr> Q_CloudInfo;
   typedef std::list<CloudInfoPtr> L_CloudInfo;
 
-  PointCloudCommon( rviz::Display* display );
+  explicit PointCloudCommon(rviz::Display* display);
   ~PointCloudCommon();
 
-  void initialize( rviz::DisplayContext* context, Ogre::SceneNode* scene_node );
+  void initialize(rviz::DisplayContext* context, Ogre::SceneNode* scene_node);
 
   void fixedFrameChanged();
   void reset();
@@ -136,9 +139,15 @@ public:
   void addMessage(const sensor_msgs::PointCloudConstPtr& cloud);
   void addMessage(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
-  ros::CallbackQueueInterface* getCallbackQueue() { return &cbqueue_; }
+  ros::CallbackQueueInterface* getCallbackQueue()
+  {
+    return &cbqueue_;
+  }
 
-  rviz::Display* getDisplay() { return display_; }
+  rviz::Display* getDisplay()
+  {
+    return display_;
+  }
 
   bool auto_size_;
 
@@ -151,7 +160,7 @@ public:
   rviz::EnumProperty* style_property_;
   rviz::FloatProperty* decay_time_property_;
 
-  void setAutoSize( bool auto_size );
+  void setAutoSize(bool auto_size);
 
 public Q_SLOTS:
   void causeRetransform();
@@ -163,11 +172,10 @@ private Q_SLOTS:
   void updateAlpha();
   void updateXyzTransformer();
   void updateColorTransformer();
-  void setXyzTransformerOptions( rviz::EnumProperty* prop );
-  void setColorTransformerOptions( rviz::EnumProperty* prop );
+  void setXyzTransformerOptions(rviz::EnumProperty* prop);
+  void setColorTransformerOptions(rviz::EnumProperty* prop);
 
 private:
-
   /**
    * \brief Transforms the cloud into the correct frame, and sets up our renderable cloud
    */
@@ -178,15 +186,15 @@ private:
 
   PointCloudTransformerPtr getXYZTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
   PointCloudTransformerPtr getColorTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  void updateTransformers( const sensor_msgs::PointCloud2ConstPtr& cloud );
+  void updateTransformers(const sensor_msgs::PointCloud2ConstPtr& cloud);
   void retransform();
   void onTransformerOptions(V_string& ops, uint32_t mask);
 
   void loadTransformers();
 
   float getSelectionBoxSize();
-  void setPropertiesHidden( const QList<rviz::Property*>& props, bool hide );
-  void fillTransformerOptions( rviz::EnumProperty* prop, uint32_t mask );
+  void setPropertiesHidden(const QList<rviz::Property*>& props, bool hide);
+  void fillTransformerOptions(rviz::EnumProperty* prop, uint32_t mask);
 
   ros::AsyncSpinner spinner_;
   ros::CallbackQueue cbqueue_;
@@ -228,11 +236,11 @@ private:
 class PointCloudSelectionHandler: public rviz::SelectionHandler
 {
 public:
-  PointCloudSelectionHandler( float box_size, PointCloudCommon::CloudInfo* cloud_info, rviz::DisplayContext* context );
+  PointCloudSelectionHandler(float box_size, PointCloudCommon::CloudInfo* cloud_info, rviz::DisplayContext* context);
   virtual ~PointCloudSelectionHandler();
 
-  virtual void createProperties( const rviz::Picked& obj, rviz::Property* parent_property );
-  virtual void destroyProperties( const rviz::Picked& obj, rviz::Property* parent_property );
+  virtual void createProperties(const rviz::Picked& obj, rviz::Property* parent_property);
+  virtual void destroyProperties(const rviz::Picked& obj, rviz::Property* parent_property);
 
   virtual bool needsAdditionalRenderPass(uint32_t pass)
   {
@@ -252,9 +260,15 @@ public:
 
   virtual void getAABBs(const rviz::Picked& obj, rviz::V_AABB& aabbs);
 
-  void setBoxSize( float size ) { box_size_=size; }
+  void setBoxSize(float size)
+  {
+    box_size_ = size;
+  }
 
-  bool hasSelections() { return !boxes_.empty(); }
+  bool hasSelections()
+  {
+    return !boxes_.empty();
+  }
 
 private:
   PointCloudCommon::CloudInfo* cloud_info_;
@@ -262,6 +276,6 @@ private:
   float box_size_;
 };
 
-} // namespace infobot_rviz_longterm
+}  // namespace infobot_rviz_longterm
 
-#endif // INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_COMMON_H
+#endif  // INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_COMMON_H

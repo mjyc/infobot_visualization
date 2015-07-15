@@ -54,14 +54,14 @@ namespace infobot_rviz_longterm
  */
 class PointCloud2Display: public rviz::MessageFilterDisplay<sensor_msgs::PointCloud2>
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   PointCloud2Display();
   ~PointCloud2Display();
 
   virtual void reset();
 
-  virtual void update( float wall_dt, float ros_dt );
+  virtual void update(float wall_dt, float ros_dt);
 
 private Q_SLOTS:
   void updateQueueSize();
@@ -71,13 +71,13 @@ protected:
   virtual void onInitialize();
 
   /** @brief Process a single message.  Overridden from MessageFilterDisplay. */
-  virtual void processMessage( const sensor_msgs::PointCloud2ConstPtr& cloud );
+  virtual void processMessage(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
   rviz::IntProperty* queue_size_property_;
 
   PointCloudCommon* point_cloud_common_;
 };
 
-} // namespace infobot_rviz_longterm
+}  // namespace infobot_rviz_longterm
 
 #endif
