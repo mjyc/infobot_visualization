@@ -56,12 +56,10 @@
 # include <sensor_msgs/PointCloud2.h>
 
 # include <rviz/selection/selection_manager.h>
-// # include <rviz/default_plugin/point_cloud_transformer.h>
+# include <rviz/default_plugin/point_cloud_transformer.h>
 # include <rviz/properties/color_property.h>
 # include <rviz/ogre_helpers/point_cloud.h>
 # include <rviz/selection/forwards.h>
-
-# include "./point_cloud_transformer.h"
 
 #endif
 
@@ -72,6 +70,8 @@ class Display;
 class DisplayContext;
 class EnumProperty;
 class FloatProperty;
+class PointCloudTransformer;
+typedef boost::shared_ptr<PointCloudTransformer> PointCloudTransformerPtr;
 }
 
 namespace infobot_rviz_longterm
@@ -80,8 +80,6 @@ namespace infobot_rviz_longterm
 struct IndexAndMessage;
 class PointCloudSelectionHandler;
 typedef boost::shared_ptr<PointCloudSelectionHandler> PointCloudSelectionHandlerPtr;
-class PointCloudTransformer;
-typedef boost::shared_ptr<PointCloudTransformer> PointCloudTransformerPtr;
 
 typedef std::vector<std::string> V_string;
 
@@ -184,8 +182,8 @@ private:
   void processMessage(const sensor_msgs::PointCloud2ConstPtr& cloud);
   void updateStatus();
 
-  PointCloudTransformerPtr getXYZTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  PointCloudTransformerPtr getColorTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
+  rviz::PointCloudTransformerPtr getXYZTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
+  rviz::PointCloudTransformerPtr getColorTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud);
   void updateTransformers(const sensor_msgs::PointCloud2ConstPtr& cloud);
   void retransform();
   void onTransformerOptions(V_string& ops, uint32_t mask);
@@ -210,7 +208,7 @@ private:
 
   struct TransformerInfo
   {
-    PointCloudTransformerPtr transformer;
+    rviz::PointCloudTransformerPtr transformer;
     QList<rviz::Property*> xyz_props;
     QList<rviz::Property*> color_props;
 
@@ -225,7 +223,7 @@ private:
   bool new_color_transformer_;
   bool needs_retransform_;
 
-  pluginlib::ClassLoader<PointCloudTransformer>* transformer_class_loader_;
+  pluginlib::ClassLoader<rviz::PointCloudTransformer>* transformer_class_loader_;
 
   rviz::Display* display_;
   rviz::DisplayContext* context_;

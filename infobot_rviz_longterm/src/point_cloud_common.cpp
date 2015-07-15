@@ -44,20 +44,19 @@
 
 #include <pluginlib/class_loader.h>
 
-// #include "rviz/default_plugin/point_cloud_transformer.h"
-// #include "rviz/default_plugin/point_cloud_transformers.h"
-#include "rviz/display.h"
-#include "rviz/display_context.h"
-#include "rviz/frame_manager.h"
-#include "rviz/ogre_helpers/point_cloud.h"
-#include "rviz/properties/bool_property.h"
-#include "rviz/properties/enum_property.h"
-#include "rviz/properties/float_property.h"
-#include "rviz/properties/vector_property.h"
-#include "rviz/uniform_string_stream.h"
-#include "rviz/validate_floats.h"
+#include <rviz/default_plugin/point_cloud_transformer.h>
+// #include <rviz/default_plugin/point_cloud_transformers.h>
+#include <rviz/display.h>
+#include <rviz/display_context.h>
+#include <rviz/frame_manager.h>
+#include <rviz/ogre_helpers/point_cloud.h>
+#include <rviz/properties/bool_property.h>
+#include <rviz/properties/enum_property.h>
+#include <rviz/properties/float_property.h>
+#include <rviz/properties/vector_property.h>
+#include <rviz/uniform_string_stream.h>
+#include <rviz/validate_floats.h>
 
-#include "./point_cloud_transformer.h"
 #include "./point_cloud_transformers.h"
 #include "./point_cloud_common.h"
 
@@ -374,8 +373,8 @@ PointCloudCommon::PointCloudCommon(rviz::Display* display)
 
 void PointCloudCommon::initialize(rviz::DisplayContext* context, Ogre::SceneNode* scene_node)
 {
-  transformer_class_loader_ = new pluginlib::ClassLoader<PointCloudTransformer>("infobot_rviz_longterm",
-    "infobot_rviz_longterm::PointCloudTransformer");
+  transformer_class_loader_ = new pluginlib::ClassLoader<rviz::PointCloudTransformer>("rviz",
+    "rviz::PointCloudTransformer");
   loadTransformers();
 
   context_ = context;
@@ -415,7 +414,7 @@ void PointCloudCommon::loadTransformers()
       continue;
     }
 
-    PointCloudTransformerPtr trans(transformer_class_loader_->createUnmanagedInstance(lookup_name));
+    rviz::PointCloudTransformerPtr trans(transformer_class_loader_->createUnmanagedInstance(lookup_name));
     trans->init();
     connect(trans.get(), SIGNAL(needRetransform()), this, SLOT(causeRetransform()));
 
@@ -424,10 +423,10 @@ void PointCloudCommon::loadTransformers()
     info.readable_name = name;
     info.lookup_name = lookup_name;
 
-    info.transformer->createProperties(display_, PointCloudTransformer::Support_XYZ, info.xyz_props);
+    info.transformer->createProperties(display_, rviz::PointCloudTransformer::Support_XYZ, info.xyz_props);
     setPropertiesHidden(info.xyz_props, true);
 
-    info.transformer->createProperties(display_, PointCloudTransformer::Support_Color, info.color_props);
+    info.transformer->createProperties(display_, rviz::PointCloudTransformer::Support_Color, info.color_props);
     setPropertiesHidden(info.color_props, true);
 
     transformers_[ name ] = info;
@@ -680,9 +679,9 @@ void PointCloudCommon::updateTransformers(const sensor_msgs::PointCloud2ConstPtr
   for (; trans_it != trans_end; ++trans_it)
   {
     const std::string& name = trans_it->first;
-    const PointCloudTransformerPtr& trans = trans_it->second.transformer;
+    const rviz::PointCloudTransformerPtr& trans = trans_it->second.transformer;
     uint32_t mask = trans->supports(cloud);
-    if (mask & PointCloudTransformer::Support_XYZ)
+    if (mask & rviz::PointCloudTransformer::Support_XYZ)
     {
       valid_xyz.insert(std::make_pair(trans->score(cloud), name));
       if (name == xyz_name)
@@ -692,7 +691,7 @@ void PointCloudCommon::updateTransformers(const sensor_msgs::PointCloud2ConstPtr
       xyz_transformer_property_->addOptionStd(name);
     }
 
-    if (mask & PointCloudTransformer::Support_Color)
+    if (mask & rviz::PointCloudTransformer::Support_Color)
     {
       valid_color.insert(std::make_pair(trans->score(cloud), name));
       if (name == color_name)
@@ -774,36 +773,36 @@ void PointCloudCommon::updateColorTransformer()
   causeRetransform();
 }
 
-PointCloudTransformerPtr PointCloudCommon::getXYZTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud)
+rviz::PointCloudTransformerPtr PointCloudCommon::getXYZTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud)
 {
   boost::recursive_mutex::scoped_lock lock(transformers_mutex_);
   M_TransformerInfo::iterator it = transformers_.find(xyz_transformer_property_->getStdString());
   if (it != transformers_.end())
   {
-    const PointCloudTransformerPtr& trans = it->second.transformer;
-    if (trans->supports(cloud) & PointCloudTransformer::Support_XYZ)
+    const rviz::PointCloudTransformerPtr& trans = it->second.transformer;
+    if (trans->supports(cloud) & rviz::PointCloudTransformer::Support_XYZ)
     {
       return trans;
     }
   }
 
-  return PointCloudTransformerPtr();
+  return rviz::PointCloudTransformerPtr();
 }
 
-PointCloudTransformerPtr PointCloudCommon::getColorTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud)
+rviz::PointCloudTransformerPtr PointCloudCommon::getColorTransformer(const sensor_msgs::PointCloud2ConstPtr& cloud)
 {
   boost::recursive_mutex::scoped_lock lock(transformers_mutex_);
   M_TransformerInfo::iterator it = transformers_.find(color_transformer_property_->getStdString());
   if (it != transformers_.end())
   {
-    const PointCloudTransformerPtr& trans = it->second.transformer;
-    if (trans->supports(cloud) & PointCloudTransformer::Support_Color)
+    const rviz::PointCloudTransformerPtr& trans = it->second.transformer;
+    if (trans->supports(cloud) & rviz::PointCloudTransformer::Support_Color)
     {
       return trans;
     }
   }
 
-  return PointCloudTransformerPtr();
+  return rviz::PointCloudTransformerPtr();
 }
 
 
@@ -840,7 +839,7 @@ bool PointCloudCommon::transformCloud(const CloudInfoPtr& cloud_info, bool updat
   Ogre::Matrix4 transform;
   transform.makeTransform(cloud_info->position_, Ogre::Vector3(1, 1, 1), cloud_info->orientation_);
 
-  V_PointCloudPoint& cloud_points = cloud_info->transformed_points_;
+  rviz::V_PointCloudPoint& cloud_points = cloud_info->transformed_points_;
   cloud_points.clear();
 
   size_t size = cloud_info->message_->width * cloud_info->message_->height;
@@ -855,8 +854,8 @@ bool PointCloudCommon::transformCloud(const CloudInfoPtr& cloud_info, bool updat
     {
       updateTransformers(cloud_info->message_);
     }
-    PointCloudTransformerPtr xyz_trans = getXYZTransformer(cloud_info->message_);
-    PointCloudTransformerPtr color_trans = getColorTransformer(cloud_info->message_);
+    rviz::PointCloudTransformerPtr xyz_trans = getXYZTransformer(cloud_info->message_);
+    rviz::PointCloudTransformerPtr color_trans = getColorTransformer(cloud_info->message_);
 
     if (!xyz_trans)
     {
@@ -874,11 +873,11 @@ bool PointCloudCommon::transformCloud(const CloudInfoPtr& cloud_info, bool updat
       return false;
     }
 
-    xyz_trans->transform(cloud_info->message_, PointCloudTransformer::Support_XYZ, transform, cloud_points);
-    color_trans->transform(cloud_info->message_, PointCloudTransformer::Support_Color, transform, cloud_points);
+    xyz_trans->transform(cloud_info->message_, rviz::PointCloudTransformer::Support_XYZ, transform, cloud_points);
+    color_trans->transform(cloud_info->message_, rviz::PointCloudTransformer::Support_Color, transform, cloud_points);
   }
 
-  for (V_PointCloudPoint::iterator cloud_point = cloud_points.begin(); cloud_point != cloud_points.end(); ++cloud_point)
+  for (rviz::V_PointCloudPoint::iterator cloud_point = cloud_points.begin(); cloud_point != cloud_points.end(); ++cloud_point)
   {
     if (!rviz::validateFloats(cloud_point->position))
     {
@@ -959,12 +958,12 @@ void PointCloudCommon::fixedFrameChanged()
 
 void PointCloudCommon::setXyzTransformerOptions(rviz::EnumProperty* prop)
 {
-  fillTransformerOptions(prop, PointCloudTransformer::Support_XYZ);
+  fillTransformerOptions(prop, rviz::PointCloudTransformer::Support_XYZ);
 }
 
 void PointCloudCommon::setColorTransformerOptions(rviz::EnumProperty* prop)
 {
-  fillTransformerOptions(prop, PointCloudTransformer::Support_Color);
+  fillTransformerOptions(prop, rviz::PointCloudTransformer::Support_Color);
 }
 
 void PointCloudCommon::fillTransformerOptions(rviz::EnumProperty* prop, uint32_t mask)
@@ -984,7 +983,7 @@ void PointCloudCommon::fillTransformerOptions(rviz::EnumProperty* prop, uint32_t
   M_TransformerInfo::iterator end = transformers_.end();
   for (; it != end; ++it)
   {
-    const PointCloudTransformerPtr& trans = it->second.transformer;
+    const rviz::PointCloudTransformerPtr& trans = it->second.transformer;
     if ((trans->supports(msg) & mask) == mask)
     {
       prop->addOption(QString::fromStdString(it->first));

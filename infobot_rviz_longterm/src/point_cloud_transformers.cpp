@@ -79,7 +79,7 @@ uint8_t IntensityPCTransformer::score(const sensor_msgs::PointCloud2ConstPtr& cl
 bool IntensityPCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud,
                                        uint32_t mask,
                                        const Ogre::Matrix4& transform,
-                                       V_PointCloudPoint& points_out)
+                                       rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_Color))
   {
@@ -295,7 +295,7 @@ uint8_t XYZPCTransformer::supports(const sensor_msgs::PointCloud2ConstPtr& cloud
 }
 
 bool XYZPCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask,
-  const Ogre::Matrix4& transform, V_PointCloudPoint& points_out)
+  const Ogre::Matrix4& transform, rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_XYZ))
   {
@@ -314,7 +314,7 @@ bool XYZPCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud, 
   uint8_t const* point_x = &cloud->data.front() + xoff;
   uint8_t const* point_y = &cloud->data.front() + yoff;
   uint8_t const* point_z = &cloud->data.front() + zoff;
-  for (V_PointCloudPoint::iterator iter = points_out.begin(); iter != points_out.end(); ++iter, point_x += point_step,
+  for (rviz::V_PointCloudPoint::iterator iter = points_out.begin(); iter != points_out.end(); ++iter, point_x += point_step,
        point_y += point_step, point_z += point_step)
   {
     iter->position.x = *reinterpret_cast<const float*>(point_x);
@@ -344,7 +344,7 @@ uint8_t RGB8PCTransformer::supports(const sensor_msgs::PointCloud2ConstPtr& clou
 }
 
 bool RGB8PCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask,
-  const Ogre::Matrix4& transform, V_PointCloudPoint& points_out)
+  const Ogre::Matrix4& transform, rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_Color))
   {
@@ -363,7 +363,7 @@ bool RGB8PCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud,
   {
     rgb_lut[i] = static_cast<float>(i) / 255.0f;
   }
-  for (V_PointCloudPoint::iterator iter = points_out.begin(); iter != points_out.end(); ++iter, rgb_ptr += point_step)
+  for (rviz::V_PointCloudPoint::iterator iter = points_out.begin(); iter != points_out.end(); ++iter, rgb_ptr += point_step)
   {
     uint32_t rgb = *reinterpret_cast<const uint32_t*>(rgb_ptr);
     iter->color.r = rgb_lut[(rgb >> 16) & 0xff];
@@ -394,7 +394,7 @@ uint8_t RGBF32PCTransformer::supports(const sensor_msgs::PointCloud2ConstPtr& cl
 }
 
 bool RGBF32PCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask,
-  const Ogre::Matrix4& transform, V_PointCloudPoint& points_out)
+  const Ogre::Matrix4& transform, rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_Color))
   {
@@ -435,7 +435,7 @@ uint8_t FlatColorPCTransformer::score(const sensor_msgs::PointCloud2ConstPtr& cl
 bool FlatColorPCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud,
                                        uint32_t mask,
                                        const Ogre::Matrix4& transform,
-                                       V_PointCloudPoint& points_out)
+                                       rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_Color))
   {
@@ -478,7 +478,7 @@ uint8_t AxisColorPCTransformer::score(const sensor_msgs::PointCloud2ConstPtr& cl
 bool AxisColorPCTransformer::transform(const sensor_msgs::PointCloud2ConstPtr& cloud,
                                        uint32_t mask,
                                        const Ogre::Matrix4& transform,
-                                       V_PointCloudPoint& points_out)
+                                       rviz::V_PointCloudPoint& points_out)
 {
   if (!(mask & Support_Color))
   {
@@ -616,9 +616,9 @@ void AxisColorPCTransformer::updateAutoComputeBounds()
 }  // end namespace infobot_rviz_longterm
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::AxisColorPCTransformer, infobot_rviz_longterm::PointCloudTransformer)
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::FlatColorPCTransformer, infobot_rviz_longterm::PointCloudTransformer)
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::IntensityPCTransformer, infobot_rviz_longterm::PointCloudTransformer)
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::RGB8PCTransformer,      infobot_rviz_longterm::PointCloudTransformer)
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::RGBF32PCTransformer,    infobot_rviz_longterm::PointCloudTransformer)
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::XYZPCTransformer,       infobot_rviz_longterm::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::AxisColorPCTransformer, rviz::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::FlatColorPCTransformer, rviz::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::IntensityPCTransformer, rviz::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::RGB8PCTransformer,      rviz::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::RGBF32PCTransformer,    rviz::PointCloudTransformer)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::XYZPCTransformer,       rviz::PointCloudTransformer)
