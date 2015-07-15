@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MAP_DISPLAY_H
-#define MAP_DISPLAY_H
+#ifndef INFOBOT_RVIZ_MAP_MAP_DISPLAY_H
+#define INFOBOT_RVIZ_MAP_MAP_DISPLAY_H
 
 #include <string>
 #include <vector>
