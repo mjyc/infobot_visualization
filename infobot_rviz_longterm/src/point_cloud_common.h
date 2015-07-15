@@ -31,35 +31,38 @@
 #define INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_COMMON_H
 
 #ifndef Q_MOC_RUN  // See: https://bugreports.qt-project.org/browse/QTBUG-22829
-# include <deque>
-# include <queue>
-# include <vector>
-# include <list>
-# include <string>
-# include <map>
+#include <deque>
+#include <queue>
+#include <vector>
+#include <list>
+#include <string>
+#include <map>
 
-# include <QObject>
-# include <QList>
+#include <QObject>
+#include <QList>
 
-# include <boost/shared_ptr.hpp>
-# include <boost/thread/mutex.hpp>
-# include <boost/thread/recursive_mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
-# include <ros/spinner.h>
-# include <ros/callback_queue.h>
+#include <ros/spinner.h>
+#include <ros/callback_queue.h>
 
-# include <message_filters/time_sequencer.h>
+#include <message_filters/time_sequencer.h>
 
-# include <pluginlib/class_loader.h>
+#include <pluginlib/class_loader.h>
 
-# include <sensor_msgs/PointCloud.h>
-# include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
 
-# include <rviz/selection/selection_manager.h>
-# include <rviz/default_plugin/point_cloud_transformer.h>
-# include <rviz/properties/color_property.h>
-# include <rviz/ogre_helpers/point_cloud.h>
-# include <rviz/selection/forwards.h>
+#include <rviz/selection/selection_manager.h>
+#include <rviz/default_plugin/point_cloud_transformer.h>
+#include <rviz/properties/color_property.h>
+#include <rviz/ogre_helpers/point_cloud.h>
+#include <rviz/selection/forwards.h>
+
+#include <ros/ros.h>
+#include <std_srvs/Empty.h>
 
 #endif
 
@@ -229,6 +232,12 @@ private:
   rviz::DisplayContext* context_;
 
   friend class PointCloudSelectionHandler;
+
+
+  //---- TODO(mjyc) Make this proper in future ----//
+  ros::NodeHandle nh_;
+  ros::ServiceServer service_;
+  bool serviceCallback(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res);
 };
 
 class PointCloudSelectionHandler: public rviz::SelectionHandler

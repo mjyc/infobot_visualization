@@ -323,6 +323,7 @@ PointCloudCommon::PointCloudCommon(rviz::Display* display)
   , transformer_class_loader_(NULL)
   , display_(display)
   , auto_size_(false)
+  , nh_("~")
 {
   selectable_property_ = new rviz::BoolProperty("Selectable", true,
       "Whether or not the points in this point cloud are selectable.",
@@ -369,6 +370,15 @@ PointCloudCommon::PointCloudCommon(rviz::Display* display)
       display_, SLOT(updateColorTransformer()), this);
   connect(color_transformer_property_, SIGNAL(requestOptions(rviz::EnumProperty*)),
           this, SLOT(setColorTransformerOptions(rviz::EnumProperty*)));
+
+  // TODO(mjyc): udpate this
+  service_ = nh_.advertiseService("/test_rviz_service", &PointCloudCommon::serviceCallback, this);
+}
+
+bool PointCloudCommon::serviceCallback(std_srvs::Empty::Request  &req,
+                                       std_srvs::Empty::Response &res)
+{
+    decay_time_property_->setFloat(decay_time_property_->getFloat() + 1.0);
 }
 
 void PointCloudCommon::initialize(rviz::DisplayContext* context, Ogre::SceneNode* scene_node)
