@@ -23,7 +23,6 @@ add_definitions(-DQT_NO_KEYWORDS)
 qt4_wrap_cpp(MOC_FILES
   src/point_cloud2_display.h
   src/point_cloud_common.h
-  src/point_cloud_transformer.h
   src/point_cloud_transformers.h
   OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
 )
@@ -53,7 +52,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 ## library and names the actual file something like
 ## "librviz_plugin_tutorials.so", or whatever is appropriate for your
 ## particular OS.
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${Boost_LIBRARIES} ${OCTOMAP_LIBRARIES} ${catkin_LIBRARIES} -ldefault_plugin)
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${OGRE_OV_LIBRARIES_ABS} -ldefault_plugin)
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 ## END_TUTORIAL
 
