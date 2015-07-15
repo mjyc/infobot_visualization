@@ -32,21 +32,21 @@
 
 #include <ros/time.h>
 
-#include <rviz/default_plugin/point_cloud_common.h>
-#include <rviz/default_plugin/point_cloud_transformers.h>
 #include <rviz/display_context.h>
 #include <rviz/frame_manager.h>
 #include <rviz/ogre_helpers/point_cloud.h>
 #include <rviz/properties/int_property.h>
 #include <rviz/validate_floats.h>
 
+#include "./point_cloud_common.h"
+#include "./point_cloud_transformers.h"
 #include "./point_cloud2_display.h"
 
 namespace infobot_rviz_longterm
 {
 
 PointCloud2Display::PointCloud2Display()
-  : point_cloud_common_( new rviz::PointCloudCommon( this ))
+  : point_cloud_common_( new PointCloudCommon( this ))
 {
   queue_size_property_ = new rviz::IntProperty( "Queue Size", 10,
                                           "Advanced: set the size of the incoming PointCloud2 message queue. "
@@ -81,9 +81,9 @@ void PointCloud2Display::processMessage( const sensor_msgs::PointCloud2ConstPtr&
   // will get their points put off in lala land, but it means they still do get processed/rendered
   // which can be a big performance hit
   sensor_msgs::PointCloud2Ptr filtered(new sensor_msgs::PointCloud2);
-  int32_t xi = rviz::findChannelIndex(cloud, "x");
-  int32_t yi = rviz::findChannelIndex(cloud, "y");
-  int32_t zi = rviz::findChannelIndex(cloud, "z");
+  int32_t xi = findChannelIndex(cloud, "x");
+  int32_t yi = findChannelIndex(cloud, "y");
+  int32_t zi = findChannelIndex(cloud, "z");
 
   if (xi == -1 || yi == -1 || zi == -1)
   {

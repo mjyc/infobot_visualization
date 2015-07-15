@@ -1,8 +1,40 @@
 <library path="lib/libinfobot_rviz_longterm">
-  <class name="rviz/PointCloud2" type="rviz::PointCloud2Display" base_class_type="rviz::Display">
+  <class name="infobot_rviz_longterm/PointCloud2" type="infobot_rviz_longterm::PointCloud2Display" base_class_type="rviz::Display">
     <description>
-      Displays a point cloud from an accumulated sensor_msgs::PointCloud2 message(s) as points in the world.
+      Displays a point cloud from a sensor_msgs::PointCloud2 message as points in the world. This plugin is specialized to display long-term, or accumulated point cloud data.
     </description>
     <message_type>sensor_msgs/PointCloud2</message_type>
   </class>
+
+  <class name="infobot_rviz_longterm/XYZ" type="infobot_rviz_longterm::XYZPCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Transforms the point cloud data into XYZ coordinates to position each point.
+    </description>
+  </class>
+  <class name="infobot_rviz_longterm/Intensity" type="infobot_rviz_longterm::IntensityPCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Transforms the color of each point based on its "intensity" value.
+    </description>
+  </class>
+  <class name="infobot_rviz_longterm/RGB8" type="infobot_rviz_longterm::RGB8PCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Sets the color of each point based on RGB8 data.
+    </description>
+  </class>
+  <class name="infobot_rviz_longterm/RGBF32" type="infobot_rviz_longterm::RGBF32PCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Sets the color of each point based on RGBF32 data.
+    </description>
+  </class>
+  <class name="infobot_rviz_longterm/FlatColor" type="infobot_rviz_longterm::FlatColorPCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Sets the color of each point to be a single flat color.
+    </description>
+  </class>
+  <class name="infobot_rviz_longterm/AxisColor" type="infobot_rviz_longterm::AxisColorPCTransformer" base_class_type="infobot_rviz_longterm::PointCloudTransformer">
+    <description>
+      Sets the color of each point based on its position along one of the X, Y, or Z axes.
+    </description>
+  </class>
+
 </library>

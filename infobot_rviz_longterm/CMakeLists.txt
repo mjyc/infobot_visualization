@@ -22,6 +22,9 @@ add_definitions(-DQT_NO_KEYWORDS)
 ## Qt's meta-object compiler.
 qt4_wrap_cpp(MOC_FILES
   src/point_cloud2_display.h
+  src/point_cloud_common.h
+  src/point_cloud_transformer.h
+  src/point_cloud_transformers.h
   OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
 )
 
@@ -29,6 +32,8 @@ qt4_wrap_cpp(MOC_FILES
 ## the previous command which is stored in ``${MOC_FILES}``.
 set(SOURCE_FILES
   src/point_cloud2_display.cpp
+  src/point_cloud_common.cpp
+  src/point_cloud_transformers.cpp
   ${MOC_FILES}
 )
 

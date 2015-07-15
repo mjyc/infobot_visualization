@@ -34,10 +34,11 @@
 
 #include <rviz/message_filter_display.h>
 
+#include "./point_cloud_common.h"
+
 namespace rviz
 {
 class IntProperty;
-class PointCloudCommon;
 }
 
 namespace infobot_rviz_longterm
@@ -74,7 +75,7 @@ protected:
 
   rviz::IntProperty* queue_size_property_;
 
-  rviz::PointCloudCommon* point_cloud_common_;
+  PointCloudCommon* point_cloud_common_;
 };
 
 } // namespace infobot_rviz_longterm
