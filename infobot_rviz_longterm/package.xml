@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>infobot_rviz_longterm</name>
+  <version>0.0.0</version>
+  <description>
+    InfoBot Framework: Visualization tools for long-term data
+  </description>
+  <author email="mjyc@cs.washington.edu">Michael Jae-Yoon Chung</author>
+  <maintainer email="mjyc@cs.washington.edu">Michael Jae-Yoon Chung</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rviz</build_depend>
+  <build_depend>roscpp</build_depend>
+
+  <run_depend>rviz</run_depend>
+  <run_depend>roscpp</run_depend>
+
+  <export>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+</package>
