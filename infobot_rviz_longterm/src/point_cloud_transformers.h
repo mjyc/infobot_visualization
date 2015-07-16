@@ -217,20 +217,6 @@ private:
   rviz::BoolProperty* use_fixed_frame_property_;
 };
 
-class FlatColorPCTransformer : public rviz::PointCloudTransformer
-{
-  Q_OBJECT
-public:
-  virtual uint8_t supports(const sensor_msgs::PointCloud2ConstPtr& cloud);
-  virtual bool transform(const sensor_msgs::PointCloud2ConstPtr& cloud, uint32_t mask, const Ogre::Matrix4& transform,
-    rviz::V_PointCloudPoint& points_out);
-  virtual void createProperties(rviz::Property* parent_property, uint32_t mask, QList<rviz::Property*>& out_props);
-  virtual uint8_t score(const sensor_msgs::PointCloud2ConstPtr& cloud);
-
-private:
-  rviz::ColorProperty* color_property_;
-};
-
 }  // namespace infobot_rviz_longterm
 
 #endif  // INFOBOT_RVIZ_LONGTERM_POINT_CLOUD_TRANSFORMERS_H
