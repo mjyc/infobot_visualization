@@ -38,15 +38,16 @@
 #include <rviz/properties/int_property.h>
 #include <rviz/validate_floats.h>
 
-#include "./point_cloud_common.h"
-#include "./point_cloud_transformers.h"
-#include "./point_cloud2_display.h"
+// #include "./point_cloud_longterm.h"
+// #include "./point_cloud_transformers.h"
+#include "./point_cloud2_longterm_display.h"
 
 namespace infobot_rviz_longterm
 {
 
-PointCloud2Display::PointCloud2Display()
-  : point_cloud_common_(new PointCloudCommon(this))
+// PointCloud2LongTermDisplay::PointCloud2LongTermDisplay()
+//   : point_cloud_common_(new PointCloudCommon(this))
+PointCloud2LongTermDisplay::PointCloud2LongTermDisplay()
 {
   queue_size_property_ = new rviz::IntProperty("Queue Size", 10,
       "Advanced: set the size of the incoming PointCloud2 message queue. "
@@ -56,26 +57,26 @@ PointCloud2Display::PointCloud2Display()
 
   // PointCloudCommon sets up a callback queue with a thread for each
   // instance.  Use that for processing incoming messages.
-  update_nh_.setCallbackQueue(point_cloud_common_->getCallbackQueue());
+  // update_nh_.setCallbackQueue(point_cloud_common_->getCallbackQueue());
 }
 
-PointCloud2Display::~PointCloud2Display()
+PointCloud2LongTermDisplay::~PointCloud2LongTermDisplay()
 {
-  delete point_cloud_common_;
+  // delete point_cloud_common_;
 }
 
-void PointCloud2Display::onInitialize()
+void PointCloud2LongTermDisplay::onInitialize()
 {
   MFDClass::onInitialize();
-  point_cloud_common_->initialize(context_, scene_node_);
+  // point_cloud_common_->initialize(context_, scene_node_);
 }
 
-void PointCloud2Display::updateQueueSize()
+void PointCloud2LongTermDisplay::updateQueueSize()
 {
   tf_filter_->setQueueSize((uint32_t) queue_size_property_->getInt());
 }
 
-void PointCloud2Display::processMessage(const sensor_msgs::PointCloud2ConstPtr& cloud)
+void PointCloud2LongTermDisplay::processMessage(const sensor_msgs::PointCloud2ConstPtr& cloud)
 {
   // Filter any nan values out of the cloud.  Any nan values that make it through to PointCloudBase
   // will get their points put off in lala land, but it means they still do get processed/rendered
@@ -160,22 +161,22 @@ void PointCloud2Display::processMessage(const sensor_msgs::PointCloud2ConstPtr& 
   filtered->point_step = point_step;
   filtered->row_step = output_count;
 
-  point_cloud_common_->addMessage(filtered);
+  // point_cloud_common_->addMessage(filtered);
 }
 
 
-void PointCloud2Display::update(float wall_dt, float ros_dt)
+void PointCloud2LongTermDisplay::update(float wall_dt, float ros_dt)
 {
-  point_cloud_common_->update(wall_dt, ros_dt);
+  // point_cloud_common_->update(wall_dt, ros_dt);
 }
 
-void PointCloud2Display::reset()
+void PointCloud2LongTermDisplay::reset()
 {
   MFDClass::reset();
-  point_cloud_common_->reset();
+  // point_cloud_common_->reset();
 }
 
 }  // namespace infobot_rviz_longterm
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::PointCloud2Display, rviz::Display)
+PLUGINLIB_EXPORT_CLASS(infobot_rviz_longterm::PointCloud2LongTermDisplay, rviz::Display)

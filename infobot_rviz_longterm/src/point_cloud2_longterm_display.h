@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Willow Garage, Inc.
+ * Copyright (c) 2012, Willow Garage, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,14 +27,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INFOBOT_RVIZ_LONGTERM_POINT_CLOUD2_DISPLAY_H
-#define INFOBOT_RVIZ_LONGTERM_POINT_CLOUD2_DISPLAY_H
+#ifndef INFOBOT_RVIZ_LONGTERM_POINT_CLOUD2_LONGTERM_DISPLAY_H
+#define INFOBOT_RVIZ_LONGTERM_POINT_CLOUD2_LONGTERM_DISPLAY_H
 
 #include <sensor_msgs/PointCloud2.h>
 
 #include <rviz/message_filter_display.h>
-
-#include "./point_cloud_common.h"
 
 namespace rviz
 {
@@ -44,20 +42,25 @@ class IntProperty;
 namespace infobot_rviz_longterm
 {
 
-/**
- * \class PointCloud2Display
- * \brief Displays a point cloud of type sensor_msgs::PointCloud2
- *
- * By default it will assume channel 0 of the cloud is an intensity value, and will color them by intensity.
- * If you set the channel's name to "rgb", it will interpret the channel as an integer rgb value, with r, g and b
- * all being 8 bits.
- */
-class PointCloud2Display: public rviz::MessageFilterDisplay<sensor_msgs::PointCloud2>
+inline int32_t findChannelIndex(const sensor_msgs::PointCloud2ConstPtr& cloud, const std::string& channel)
+{
+  for (size_t i = 0; i < cloud->fields.size(); ++i)
+  {
+    if (cloud->fields[i].name == channel)
+    {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+class PointCloud2LongTermDisplay: public rviz::MessageFilterDisplay<sensor_msgs::PointCloud2>
 {
   Q_OBJECT
 public:
-  PointCloud2Display();
-  ~PointCloud2Display();
+  PointCloud2LongTermDisplay();
+  ~PointCloud2LongTermDisplay();
 
   virtual void reset();
 
@@ -75,7 +78,7 @@ protected:
 
   rviz::IntProperty* queue_size_property_;
 
-  PointCloudCommon* point_cloud_common_;
+  // PointCloudLongTerm* point_cloud_common_;
 };
 
 }  // namespace infobot_rviz_longterm

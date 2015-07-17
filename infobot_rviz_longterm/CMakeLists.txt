@@ -21,18 +21,15 @@ add_definitions(-DQT_NO_KEYWORDS)
 ## Here we specify which header files need to be run through "moc",
 ## Qt's meta-object compiler.
 qt4_wrap_cpp(MOC_FILES
-  src/point_cloud2_display.h
-  src/point_cloud_common.h
-  src/point_cloud_transformers.h
-  OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED
+  # src/point_cloud_longterm.h
+  src/point_cloud2_longterm_display.h
 )
 
 ## Here we specify the list of source files, including the output of
 ## the previous command which is stored in ``${MOC_FILES}``.
 set(SOURCE_FILES
-  src/point_cloud2_display.cpp
-  src/point_cloud_common.cpp
-  src/point_cloud_transformers.cpp
+  # src/point_cloud_longterm.cpp
+  src/point_cloud2_longterm_display.cpp
   ${MOC_FILES}
 )
 
@@ -52,7 +49,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 ## library and names the actual file something like
 ## "librviz_plugin_tutorials.so", or whatever is appropriate for your
 ## particular OS.
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${OGRE_OV_LIBRARIES_ABS} -ldefault_plugin)
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 ## END_TUTORIAL
 
@@ -69,6 +66,9 @@ install(TARGETS
 install(FILES
   plugin_description.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+# install(DIRECTORY media/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/media)
 
 install(DIRECTORY icons/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/icons)
