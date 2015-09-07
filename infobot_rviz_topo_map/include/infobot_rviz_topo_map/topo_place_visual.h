@@ -70,4 +70,4 @@ class TopoPlaceVisual
 }  // namespace infobot_rviz_topo_map
 
 
-#endif
+#endif  // INFOBOT_RVIZ_TOPO_MAP_TOPO_PLACE_VISUAL_H

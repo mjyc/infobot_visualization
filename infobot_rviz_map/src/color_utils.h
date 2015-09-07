@@ -1,5 +1,5 @@
-#ifndef SARA_RVIZ_VISIBILITY_REASONER_UTILS
-#define SARA_RVIZ_VISIBILITY_REASONER_UTILS
+#ifndef INFOBOT_RVIZ_MAP_COLOR_UTILS_H
+#define INFOBOT_RVIZ_MAP_COLOR_UTILS_H
 
 // MATLAB Jet Color Palette
 // From http://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale
@@ -40,4 +40,4 @@ inline void colorMATLABJetPalette(double v, double vmin, double vmax, double& r,
   }
 }
 
-#endif
+#endif  // INFOBOT_RVIZ_MAP_COLOR_UTILS_H

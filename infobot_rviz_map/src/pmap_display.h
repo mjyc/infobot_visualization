@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INFOBOT_RVIZ_MAP_PROBABILITY_MAP_DISPLAY_H
-#define INFOBOT_RVIZ_MAP_PROBABILITY_MAP_DISPLAY_H
+#ifndef INFOBOT_RVIZ_MAP_PMAP_DISPLAY_H
+#define INFOBOT_RVIZ_MAP_PMAP_DISPLAY_H
 
 #include <string>
 #include <vector>
@@ -162,4 +162,4 @@ protected:
 
 }  // namespace infobot_rviz_map
 
-#endif
+#endif  // INFOBOT_RVIZ_MAP_PMAP_DISPLAY_H
